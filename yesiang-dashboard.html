@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>鈺祥企業競爭情報儀表板 · AMC化學濾網產業</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+  :root{
+    --void:#F4F8FD;
+    --panel:#FFFFFF;
+    --panel-2:#EFF5FC;
+    --line:#DCE7F5;
+    --teal:#1D6FE0;
+    --teal-dim:#AFCBF2;
+    --violet:#7C5CFC;
+    --amber:#E0932E;
+    --red:#D6455A;
+    --text-hi:#0E2340;
+    --text-lo:#5B6B84;
+    --text-faint:#93A3BB;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(29,111,224,0.07), transparent 60%),
+      radial-gradient(ellipse 700px 400px at 100% 0%, rgba(124,92,252,0.06), transparent 55%),
+      var(--void);
+    color:var(--text-hi);
+    font-family:'Noto Sans TC','IBM Plex Sans',ui-sans-serif,system-ui,sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .disp{font-family:'Space Grotesk','Noto Sans TC',sans-serif;}
+  .mono{font-family:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;}
+
+  a{color:inherit;}
+  :focus-visible{outline:2px solid var(--teal); outline-offset:2px;}
+
+  .wrap{max-width:1180px; margin:0 auto; padding:28px 24px 80px;}
+
+  /* ---------- Header ---------- */
+  header{
+    display:flex; flex-wrap:wrap; gap:16px 24px; align-items:flex-end; justify-content:space-between;
+    padding-bottom:20px; margin-bottom:22px; border-bottom:1px solid var(--line);
+  }
+  .title-block .eyebrow{
+    font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--teal);
+    font-family:'IBM Plex Mono',monospace; margin-bottom:8px; display:flex; align-items:center; gap:8px;
+  }
+  .eyebrow .dot{width:6px; height:6px; border-radius:50%; background:var(--teal); box-shadow:0 0 8px var(--teal); animation:pulse 2.4s ease-in-out infinite;}
+  @media (prefers-reduced-motion: reduce){ .eyebrow .dot{animation:none;} }
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:.35;}}
+  h1{font-size:28px; margin:0; font-weight:700; letter-spacing:-.01em;}
+  .subtitle{color:var(--text-lo); font-size:14px; margin-top:6px;}
+
+  .meta{
+    text-align:right; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text-lo);
+    display:flex; flex-direction:column; gap:6px; align-items:flex-end;
+  }
+  .meta .badge{
+    background:rgba(224,147,46,0.12); color:var(--amber); border:1px solid rgba(224,147,46,0.35);
+    padding:4px 10px; border-radius:20px; font-size:11px; letter-spacing:.03em;
+  }
+
+  /* ---------- Tabs ---------- */
+  .tabs{display:flex; gap:6px; margin-bottom:28px; flex-wrap:wrap;}
+  .tab-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:.02em;
+    background:transparent; color:var(--text-lo); border:1px solid var(--line);
+    padding:9px 18px; border-radius:8px; cursor:pointer; transition:all .15s ease;
+  }
+  .tab-btn:hover{color:var(--text-hi); border-color:var(--teal-dim);}
+  .tab-btn.active{background:var(--teal); color:#FFFFFF; border-color:var(--teal); font-weight:600;}
+
+  .panel{visibility:visible;}
+  .panel[hidden]{display:none;}
+
+  /* ---------- KPI row ---------- */
+  .kpi-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px;}
+  @media(max-width:860px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+  .kpi{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px 18px 16px;
+    position:relative; overflow:hidden; box-shadow:0 2px 10px rgba(29,111,224,0.06);
+  }
+  .kpi::before{content:''; position:absolute; top:0; left:0; width:3px; height:100%; background:var(--kpi-accent, var(--teal));}
+  .kpi .label{font-size:12px; color:var(--text-lo); margin-bottom:10px;}
+  .kpi .value{font-family:'Space Grotesk',sans-serif; font-size:26px; font-weight:700; line-height:1;}
+  .kpi .value .unit{font-size:14px; color:var(--text-lo); font-weight:500; margin-left:2px;}
+  .kpi .foot{font-size:11.5px; color:var(--text-faint); margin-top:8px; font-family:'IBM Plex Mono',monospace;}
+
+  /* ---------- Section headers ---------- */
+  .sec-head{display:flex; align-items:baseline; justify-content:space-between; margin:8px 0 14px; flex-wrap:wrap; gap:8px;}
+  .sec-head h2{font-size:16px; margin:0; font-weight:700;}
+  .sec-head .note{font-size:12px; color:var(--text-faint); font-family:'IBM Plex Mono',monospace;}
+
+  .grid-2{display:grid; grid-template-columns:1.1fr 1fr; gap:16px; margin-bottom:24px;}
+  @media(max-width:900px){.grid-2{grid-template-columns:1fr;}}
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:20px; box-shadow:0 2px 10px rgba(29,111,224,0.06);}
+
+  /* ---------- Gauges (signature element) ---------- */
+  .gauge-row{display:flex; gap:18px; flex-wrap:wrap; justify-content:space-around;}
+  .gauge{display:flex; flex-direction:column; align-items:center; gap:10px; width:150px;}
+  .gauge svg{overflow:visible;}
+  .gauge .gname{font-size:13px; font-weight:700;}
+  .gauge .gscore{font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; margin-top:-46px;}
+  .gauge .gscore .of10{font-size:12px; color:var(--text-lo); font-weight:500;}
+  .gauge .gsub{font-size:10.5px; color:var(--text-faint); font-family:'IBM Plex Mono',monospace; text-align:center;}
+
+  canvas{max-width:100%;}
+
+  /* ---------- Gap cards ---------- */
+  .gap-list{display:flex; flex-direction:column; gap:12px;}
+  .gap-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px 20px;
+    display:grid; grid-template-columns:26px 1fr auto; gap:16px; align-items:start;
+    box-shadow:0 2px 10px rgba(29,111,224,0.06);
+  }
+  @media(max-width:700px){.gap-card{grid-template-columns:22px 1fr; } .gap-card .prio{grid-column:2; margin-top:8px;}}
+  .gap-num{
+    width:34px; height:34px; border-radius:9px; background:var(--panel-2); color:var(--teal);
+    display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0;
+  }
+  .gap-body h3{margin:0 0 8px; font-size:15px;}
+  .gap-body .now{font-size:13.5px; color:var(--text-lo); line-height:1.65; margin-bottom:8px;}
+  .gap-body .now b{color:var(--text-hi); font-weight:600;}
+  .gap-body .action{font-size:13.5px; line-height:1.65; padding-left:14px; border-left:2px solid var(--teal-dim); color:var(--text-hi);}
+  .gap-body .action b{color:var(--teal);}
+  .prio{font-family:'IBM Plex Mono',monospace; font-size:11px; padding:5px 10px; border-radius:20px; white-space:nowrap; height:fit-content;}
+  .prio.high{background:rgba(214,69,90,0.14); color:var(--red); border:1px solid rgba(214,69,90,0.35);}
+  .prio.mid{background:rgba(224,147,46,0.14); color:var(--amber); border:1px solid rgba(224,147,46,0.35);}
+  .prio.low{background:rgba(133,146,166,0.14); color:var(--text-lo); border:1px solid rgba(133,146,166,0.3);}
+
+  /* ---------- Global landscape ---------- */
+  .land-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  @media(max-width:900px){.land-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:620px){.land-grid{grid-template-columns:1fr;}}
+  .co-card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px 18px; display:flex; flex-direction:column; gap:8px; box-shadow:0 2px 10px rgba(29,111,224,0.06);}
+  .co-card .co-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
+  .co-card .co-name{font-weight:700; font-size:15px;}
+  .co-card .co-hq{font-size:11px; color:var(--text-faint); font-family:'IBM Plex Mono',monospace;}
+  .co-card .co-tag{font-size:10.5px; font-family:'IBM Plex Mono',monospace; padding:3px 8px; border-radius:20px; background:rgba(29,111,224,0.1); color:var(--teal); border:1px solid rgba(29,111,224,0.3); white-space:nowrap;}
+  .co-card .co-desc{font-size:13px; color:var(--text-lo); line-height:1.6;}
+  .co-card .co-rel{font-size:12px; color:var(--text-hi); line-height:1.55; padding-top:8px; border-top:1px dashed var(--line);}
+  .co-card .co-rel b{color:var(--violet);}
+
+  .legend{display:flex; gap:16px; flex-wrap:wrap; margin-bottom:6px;}
+  .legend .li{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-lo); font-family:'IBM Plex Mono',monospace;}
+  .legend .sw{width:10px; height:10px; border-radius:3px;}
+
+  footer{margin-top:36px; padding-top:20px; border-top:1px solid var(--line); font-size:12px; color:var(--text-faint); line-height:1.8;}
+  footer b{color:var(--text-lo);}
+
+  /* ---------- ESG tab ---------- */
+  .esg-table{width:100%; border-collapse:collapse; margin-bottom:28px; font-size:13px;}
+  .esg-table th, .esg-table td{padding:12px 14px; text-align:left; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.55;}
+  .esg-table th{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.02em; color:var(--text-lo);
+    text-transform:uppercase; font-weight:500; border-bottom:1px solid var(--line);
+  }
+  .esg-table th.co-yesiang{color:var(--teal);}
+  .esg-table th.co-filtec{color:var(--violet);}
+  .esg-table th.co-camfil{color:var(--amber);}
+  .esg-table td:first-child{color:var(--text-hi); font-weight:600; width:16%; white-space:nowrap;}
+  .esg-table tr:last-child td{border-bottom:none;}
+  .esg-table td .miss{color:var(--text-faint); font-style:italic;}
+  .esg-table-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+
+  .break-grid{display:flex; flex-direction:column; gap:12px;}
+  .break-card{
+    background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--teal); border-radius:10px;
+    padding:16px 20px; display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:start;
+    box-shadow:0 2px 10px rgba(29,111,224,0.06);
+  }
+  .break-card .bnum{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:20px; color:var(--teal);
+    width:34px; height:34px; border-radius:50%; border:1px solid var(--teal-dim); display:flex;
+    align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .break-card h3{margin:0 0 6px; font-size:14.5px;}
+  .break-card p{margin:0; font-size:13px; color:var(--text-lo); line-height:1.65;}
+  .break-card p b{color:var(--text-hi); font-weight:600;}
+
+  .update-note{
+    background:rgba(224,147,46,0.08); border:1px solid rgba(224,147,46,0.28); border-radius:10px;
+    padding:14px 18px; font-size:12.5px; color:var(--text-lo); line-height:1.75; margin-bottom:20px;
+  }
+  .update-note b{color:var(--amber);}
+
+  /* ---------- Icons ---------- */
+  .kpi .icon{
+    width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+    background:var(--kpi-accent, var(--teal)); color:#fff; font-size:14px; margin-bottom:12px;
+  }
+  .sec-head h2 i, .co-card .co-name i{color:var(--teal); margin-right:8px; font-size:14px;}
+  .gap-body h3 i{color:var(--teal); margin-right:8px; font-size:13px;}
+  .break-card .bnum i{font-size:15px;}
+  .co-card .co-icon{
+    width:30px; height:30px; border-radius:8px; background:var(--panel-2); color:var(--teal);
+    display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="title-block">
+      <div class="eyebrow"><span class="dot"></span>AMC FILTRATION · COMPETITIVE INTELLIGENCE</div>
+      <h1 class="disp">鈺祥企業競爭情報儀表板</h1>
+      <div class="subtitle">鈺祥企業（YESIANG）vs. 濾能（6823）／康法（Camfil）／全球同業</div>
+    </div>
+    <div class="meta">
+      <div class="badge">資料快照 · 非即時自動更新</div>
+      <div>最後更新 <span class="mono" style="color:var(--text-hi)">2026-07-13</span></div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="overview">總覽</button>
+    <button class="tab-btn" data-tab="gaps">鈺祥待加強分析</button>
+    <button class="tab-btn" data-tab="esg">ESG永續比較</button>
+    <button class="tab-btn" data-tab="landscape">全球同業地圖</button>
+  </nav>
+
+  <div class="update-note">
+    <b>關於「每週自動更新」：</b>這份儀表板是靜態網頁，無法自行連網抓取資料或排程更新。實務上建議的作法是：每週／每月固定回來跟 Claude 說一聲「更新儀表板」，我會重新搜尋鈺祥、濾能、康法與同業的最新公告、營收與ESG動態，幾分鐘內產出更新版本給你，取代真正的「全自動」更新。
+  </div>
+
+  <!-- ============ TAB 1: OVERVIEW ============ -->
+  <section class="panel" id="tab-overview">
+
+    <div class="kpi-grid">
+      <div class="kpi" style="--kpi-accent:var(--teal)">
+        <div class="icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
+        <div class="label">鈺祥 6月合併營收年增率</div>
+        <div class="value">101.60<span class="unit">%</span></div>
+        <div class="foot">單月歷史新高 · 月增3.71%</div>
+      </div>
+      <div class="kpi" style="--kpi-accent:var(--violet)">
+        <div class="icon"><i class="fa-solid fa-chart-line"></i></div>
+        <div class="label">濾能 4月合併營收年增率</div>
+        <div class="value">51.37<span class="unit">%</span></div>
+        <div class="foot">最新可查數據（待補6-7月）</div>
+      </div>
+      <div class="kpi" style="--kpi-accent:var(--teal)">
+        <div class="icon"><i class="fa-solid fa-sack-dollar"></i></div>
+        <div class="label">鈺祥 上半年累計營收</div>
+        <div class="value">11.63<span class="unit">億元</span></div>
+        <div class="foot">年增53.15%</div>
+      </div>
+      <div class="kpi" style="--kpi-accent:var(--red)">
+        <div class="icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div class="label">濾能 2025年全年EPS</div>
+        <div class="value">-7.92<span class="unit">元</span></div>
+        <div class="foot">毛利率-13.63% · 淨利率-54.12%</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="sec-head"><h2><i class="fa-solid fa-gauge-high"></i>複合競爭力指數</h2><span class="note">1–10分 · 質化評估</span></div>
+        <div class="gauge-row" id="gaugeRow"></div>
+      </div>
+      <div class="card">
+        <div class="sec-head"><h2><i class="fa-solid fa-chart-column"></i>最新單月營收年增率比較</h2><span class="note">%YoY</span></div>
+        <div id="revChart"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:24px;">
+      <div class="sec-head"><h2><i class="fa-solid fa-compass"></i>策略能力雷達圖</h2><span class="note">基於公開資訊之綜合評估，非官方評分</span></div>
+      <div class="legend" id="radarLegend"></div>
+      <div id="radarChart"></div>
+    </div>
+
+  </section>
+
+  <!-- ============ TAB 2: GAPS ============ -->
+  <section class="panel" id="tab-gaps" hidden>
+    <div class="sec-head"><h2><i class="fa-solid fa-screwdriver-wrench"></i>鈺祥（YESIANG）相對弱項與加強建議</h2><span class="note">依優先度排序</span></div>
+    <div class="gap-list" id="gapList"></div>
+  </section>
+
+  <!-- ============ TAB 2.5: ESG ============ -->
+  <section class="panel" id="tab-esg" hidden>
+    <div class="sec-head"><h2><i class="fa-solid fa-leaf"></i>ESG永續作為比較</h2><span class="note">環境（E）／社會（S）／治理（G）</span></div>
+
+    <div class="esg-table-wrap">
+      <table class="esg-table">
+        <thead>
+          <tr>
+            <th>比較面向</th>
+            <th class="co-yesiang">鈺祥 YESIANG</th>
+            <th class="co-filtec">濾能 6823</th>
+            <th class="co-camfil">康法 Camfil</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>碳中和 / 產品</td>
+            <td>全球首款碳中和化學濾網（2024年推出）</td>
+            <td>提出「碳中和 &amp; RE100」行動目標，尚在推進中</td>
+            <td>AirCair服務採100%可再生椰殼活性碳，強調全生命週期減碳</td>
+          </tr>
+          <tr>
+            <td>循環 / 國際認證</td>
+            <td>全球首家同時取得BS 8001:2017（循環經濟）與ISO 14067:2018（碳足跡）雙認證</td>
+            <td>通過BS 8001:2017循環經濟稽核；模組化濾網獲台灣環保署第二類環保標章、玉山獎最佳產品</td>
+            <td>推行EPD（產品環境宣告）計畫，自1990年代持續進行第三方稽核之生命週期評估（LCA）</td>
+          </tr>
+          <tr>
+            <td>永續報告揭露</td>
+            <td><span class="miss">尚未查到獨立公開之永續報告書</span></td>
+            <td>自2023年起每年發布《濾能永續報告書》</td>
+            <td>2025年報告揭露Scope 1&amp;2排放33,262公噸CO2e（2024年數據），採第三方稽核並對接EU CSRD規範</td>
+          </tr>
+          <tr>
+            <td>第三方ESG評等</td>
+            <td><span class="miss">尚未查到參與國際ESG評等機構</span></td>
+            <td><span class="miss">尚未查到參與國際ESG評等機構</span></td>
+            <td>採用EcoVadis評等與科學基礎減碳目標（SBTi）架構</td>
+          </tr>
+          <tr>
+            <td>再生規模 / 據點</td>
+            <td>再生濾網月產能達3萬片，為同業平均10倍以上</td>
+            <td><span class="miss">尚未公開量產規模數據</span></td>
+            <td>全球最大AMC濾網再生中心設於台灣嘉義，創造約300個在地就業機會</td>
+          </tr>
+          <tr>
+            <td>職安 / 治理</td>
+            <td><span class="miss">尚未查到獨立職安管理認證公開資訊</span></td>
+            <td>通過ISO 45001:2018職業安全衛生管理系統認證</td>
+            <td>100%據點通過ISO 9001，40%通過ISO 14001；設定2030年女性主管佔比35%之性別平權目標</td>
+          </tr>
+          <tr>
+            <td>社會參與</td>
+            <td>贊助全國寫作競賽等教育類ESG活動</td>
+            <td>金峰獎國家品牌玉山獎、國家磐石獎、桃園金牌企業卓越獎（愛地球獎）等多項肯定</td>
+            <td>全球行為準則訓練、反貪腐制度、多語系吹哨者通報機制</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sec-head"><h2><i class="fa-solid fa-award"></i>鈺祥可突破的ESG方向</h2><span class="note">對照濾能與康法之揭露落差</span></div>
+    <div class="break-grid">
+      <div class="break-card">
+        <div class="bnum"><i class="fa-solid fa-file-contract"></i></div>
+        <div>
+          <h3>發布首份獨立永續報告書，完整揭露碳盤查數據</h3>
+          <p>濾能自2023年起已每年發布永續報告書，康法更每年公開Scope 1&amp;2排放噸數並經第三方稽核。鈺祥目前對外多以單一亮點（碳中和濾網、雙認證）敘事，<b>尚未查到獨立公開的年度永續報告與量化碳盤查數字</b>。建議依ISO 14064盤查範疇1-3排放，於2027年IPO前發布首份報告，補齊揭露落差。</p>
+        </div>
+      </div>
+      <div class="break-card">
+        <div class="bnum"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+        <div>
+          <h3>導入國際第三方ESG評等（如EcoVadis）或SBTi科學減碳目標</h3>
+          <p>康法已採用EcoVadis評等與SBTi架構作為國際客戶採購時的信任背書，濾能與鈺祥目前皆<b>尚未查到參與國際第三方ESG評等機構</b>。對正在爭取國際大廠訂單、規劃海外擴廠的鈺祥而言，這是可以超前濾能、對標康法的具體切入點。</p>
+        </div>
+      </div>
+      <div class="break-card">
+        <div class="bnum"><i class="fa-solid fa-stamp"></i></div>
+        <div>
+          <h3>補齊台灣本地綠色標章，與濾能拉近國內認證能見度</h3>
+          <p>濾能已取得台灣環保署第二類環保標章與玉山獎最佳產品等本地指標性認證，強化政府標案與國內客戶ESG採購的說服力。建議鈺祥同步申請<b>環保署環保標章</b>，補上目前對比濾能相對缺乏的國內公部門認證能見度。</p>
+        </div>
+      </div>
+      <div class="break-card">
+        <div class="bnum"><i class="fa-solid fa-recycle"></i></div>
+        <div>
+          <h3>發展單一產品的環境宣告（EPD），從公司層級認證延伸到產品層級數據</h3>
+          <p>目前鈺祥的BS 8001與ISO 14067屬於<b>公司／製程層級認證</b>；康法則已針對個別產品建立環境宣告（EPD）並公開生命週期評估數據。若鈺祥能將再生濾網、碳中和濾網等主力產品做到單品環境宣告，可在客戶端ESG採購評選中提供比對手更具體的數據佐證，形成產業首見的差異化。</p>
+        </div>
+      </div>
+      <div class="break-card">
+        <div class="bnum"><i class="fa-solid fa-people-group"></i></div>
+        <div>
+          <h3>補強社會（S）與治理（G）面向的公開揭露</h3>
+          <p>鈺祥目前對外ESG敘事高度集中在環境（E）面向（碳中和、再生技術）；相較之下，濾能已取得ISO 45001職安認證，康法更設有明確的性別平權目標與治理機制。建議鈺祥同步揭露<b>職業安全衛生管理、員工多元性、供應鏈行為準則</b>等S/G面向作為，讓ESG故事更均衡完整，也更符合興櫃/上市審查與國際大廠供應鏈稽核的期待。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB 3: LANDSCAPE ============ -->
+  <section class="panel" id="tab-landscape" hidden>
+    <div class="sec-head"><h2><i class="fa-solid fa-earth-asia"></i>全球化學濾網／AMC過濾產業版圖</h2><span class="note">含化學濾網以外之相鄰業者，供參考</span></div>
+    <div class="land-grid" id="landGrid"></div>
+  </section>
+
+  <footer>
+    <b>資料來源：</b>公開資訊觀測站、財經媒體報導、公司官網、產業研究報告彙整。<br>
+    <b>更新方式：</b>本儀表板為手動彙整之靜態快照，非串接即時資料庫。建議每月請 Claude 依相同架構重新蒐集最新數據後產出更新版本。<br>
+    <b>競爭力指數與雷達圖</b>屬於質化分析評估，用於輔助策略討論，非官方或第三方評等機構之正式評分。
+  </footer>
+
+</div>
+
+<script>
+/* ---------------- Tabs ---------------- */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p=>p.hidden=true);
+    document.getElementById('tab-'+btn.dataset.tab).hidden=false;
+  });
+});
+
+/* ---------------- helpers ---------------- */
+function hexToRgba(hex, a){
+  const v = hex.replace('#','');
+  const r = parseInt(v.substring(0,2),16), g = parseInt(v.substring(2,4),16), b = parseInt(v.substring(4,6),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+/* ---------------- Gauges (custom SVG) ---------------- */
+const gaugeData = [
+  {name:'鈺祥 YESIANG', score:8.3, color:'#1D6FE0', sub:'先進製程龍頭 · 高成長'},
+  {name:'濾能 6823', score:4.7, color:'#7C5CFC', sub:'紅海競爭 · 調整期'},
+  {name:'康法 Camfil', score:8.1, color:'#E0932E', sub:'全球規模 · 品牌領先'},
+];
+function buildGauge(item){
+  const r=52, circ=Math.PI*r; // half circle
+  const pct = item.score/10;
+  const dash = circ*pct;
+  return `
+  <div class="gauge">
+    <svg width="150" height="90" viewBox="0 0 150 90">
+      <path d="M 15 80 A 60 60 0 0 1 135 80" fill="none" stroke="#E3ECF8" stroke-width="10" stroke-linecap="round"/>
+      <path d="M 15 80 A 60 60 0 0 1 135 80" fill="none" stroke="${item.color}" stroke-width="10" stroke-linecap="round"
+        stroke-dasharray="${dash} ${circ}" style="filter:drop-shadow(0 0 6px ${item.color}66)"/>
+    </svg>
+    <div class="gscore disp">${item.score}<span class="of10">/10</span></div>
+    <div class="gname">${item.name}</div>
+    <div class="gsub">${item.sub}</div>
+  </div>`;
+}
+document.getElementById('gaugeRow').innerHTML = gaugeData.map(buildGauge).join('');
+
+/* ---------------- Revenue YoY bar chart (pure SVG) ---------------- */
+function buildBarChart(items, w=460, h=250){
+  const padL=44, padR=20, padT=28, padB=46;
+  const chartW = w-padL-padR, chartH = h-padT-padB;
+  const maxVal = Math.max(...items.map(i=>i.value)) * 1.2;
+  const slot = chartW/items.length;
+  const barW = slot*0.42;
+  const rings = 4;
+  let grid='';
+  for(let g=0; g<=rings; g++){
+    const val = maxVal/rings*g;
+    const y = padT + chartH - (val/maxVal)*chartH;
+    grid += `<line x1="${padL}" y1="${y}" x2="${w-padR}" y2="${y}" stroke="#E3ECF8" stroke-width="1"/>`;
+    grid += `<text x="${padL-8}" y="${y+4}" text-anchor="end" font-size="10" fill="#93A3BB" font-family="'IBM Plex Mono',monospace">${Math.round(val)}%</text>`;
+  }
+  let bars='';
+  items.forEach((item,i)=>{
+    const x = padL + slot*i + (slot-barW)/2;
+    const barH = (item.value/maxVal)*chartH;
+    const y = padT + chartH - barH;
+    bars += `
+      <rect x="${x}" y="${y}" width="${barW}" height="${barH}" rx="7" fill="${item.color}"/>
+      <text x="${x+barW/2}" y="${y-10}" text-anchor="middle" font-size="16" font-weight="700" fill="#0E2340" font-family="'Space Grotesk',sans-serif">${item.value}%</text>
+      <text x="${x+barW/2}" y="${h-padB+20}" text-anchor="middle" font-size="11.5" fill="#5B6B84" font-family="'IBM Plex Mono',monospace">${item.label}</text>
+    `;
+  });
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" style="max-width:100%;">${grid}${bars}</svg>`;
+}
+document.getElementById('revChart').innerHTML = buildBarChart([
+  {label:'鈺祥 (2026/06)', value:101.60, color:'#1D6FE0'},
+  {label:'濾能 (2026/04)', value:51.37, color:'#7C5CFC'},
+]);
+
+/* ---------------- Radar chart (pure SVG) ---------------- */
+const radarLabels = ['市占率','技術創新','財務成長動能','國際化程度','品牌認知度','產品線廣度'];
+const radarSets = [
+  {label:'鈺祥 YESIANG', color:'#1D6FE0', data:[9,9,9,5,6,5]},
+  {label:'濾能 6823', color:'#7C5CFC', data:[6,6,4,3,4,5]},
+  {label:'康法 Camfil', color:'#E0932E', data:[8,7,6,10,9,9]},
+];
+document.getElementById('radarLegend').innerHTML = radarSets.map(s=>
+  `<div class="li"><span class="sw" style="background:${s.color}"></span>${s.label}</div>`).join('');
+
+function buildRadarChart(labels, datasets, size=380){
+  const cx = size/2, cy = size/2+4;
+  const R = size/2 - 70;
+  const n = labels.length;
+  const maxVal = 10, rings = 5;
+  const angle = i => (Math.PI*2/n)*i - Math.PI/2;
+  const pt = (i, frac) => {
+    const a = angle(i);
+    return [cx + R*frac*Math.cos(a), cy + R*frac*Math.sin(a)];
+  };
+  let grid='';
+  for(let r=1;r<=rings;r++){
+    const frac = r/rings;
+    const pts = labels.map((_,i)=>pt(i,frac).join(',')).join(' ');
+    grid += `<polygon points="${pts}" fill="none" stroke="#E3ECF8" stroke-width="1"/>`;
+  }
+  let axes='';
+  labels.forEach((lab,i)=>{
+    const [x,y] = pt(i,1);
+    axes += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#E3ECF8" stroke-width="1"/>`;
+    const [lx,ly] = pt(i,1.2);
+    axes += `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" font-size="12" fill="#0E2340" font-family="'Noto Sans TC',sans-serif">${lab}</text>`;
+  });
+  let series='';
+  datasets.forEach(ds=>{
+    const pts = ds.data.map((v,i)=>pt(i, v/maxVal).join(',')).join(' ');
+    series += `<polygon points="${pts}" fill="${hexToRgba(ds.color,0.16)}" stroke="${ds.color}" stroke-width="2"/>`;
+    ds.data.forEach((v,i)=>{
+      const [x,y] = pt(i, v/maxVal);
+      series += `<circle cx="${x}" cy="${y}" r="3.2" fill="${ds.color}"/>`;
+    });
+  });
+  return `<svg viewBox="0 0 ${size} ${size+10}" width="100%" height="${size+10}" style="max-width:100%;">${grid}${axes}${series}</svg>`;
+}
+document.getElementById('radarChart').innerHTML = buildRadarChart(radarLabels, radarSets);
+
+/* ---------------- Gap analysis list ---------------- */
+const gaps = [
+  {
+    icon:'fa-earth-americas',
+    title:'全球市占規模仍屬區隔性領先，非全球前三',
+    now:'全球AMC濾網市場中，<b>Entegris、Exyte Technology、康法三大廠合計約占55%市占</b>；鈺祥雖是台灣先進製程（10奈米以下）市占逾八成的區域龍頭，但放在全球尺度仍是「隱形冠軍」而非規模最大者。',
+    action:'加速美國亞利桑那州、日本熊本產能布局，提升北美與日本在地供應比重，卡位美國CHIPS Act帶動的本土化採購商機。',
+    prio:'high'
+  },
+  {
+    icon:'fa-layer-group',
+    title:'產品線廣度較窄，聚焦化學濾網單一品類',
+    now:'相較Camfil、Entegris涵蓋粒子前濾網、HEPA/ULPA濾網到氣體純化的<b>全品類無塵室空氣品質方案</b>，鈺祥目前核心仍集中在化學／AMC濾網。',
+    action:'評估策略聯盟或技術授權方式切入粒子濾網領域，朝「一站式潔淨空氣解決方案」發展，提高單一客戶的產品滲透率與轉換成本。',
+    prio:'mid'
+  },
+  {
+    icon:'fa-clipboard-check',
+    title:'新品驗證流程曾造成獲利延宕',
+    now:'2025年因大客戶轉換再生濾網之認證延宕，<b>當年EPS僅2.64元</b>，顯示新技術從送樣到量產之間存在時程風險，近期雖已通過認證，但流程本身仍待標準化。',
+    action:'依公司自訂發展計畫，建立「需求→設計→製程→文件」標準化研發流程，並擴建試驗線，縮短未來新品的驗證週期。',
+    prio:'high'
+  },
+  {
+    icon:'fa-flask-vial',
+    title:'關鍵原料高度集中，成本波動風險大',
+    now:'化學濾網核心原料椰殼活性碳<b>過去一年價格上漲近一倍</b>，且鈺祥自身規劃中亦提到需推動原料多元化以降低供應鏈風險，顯示目前原料來源相對單一。',
+    action:'加速開發替代吸附材料與多元原料來源，降低單一原料價格波動對毛利率的衝擊。',
+    prio:'high'
+  },
+  {
+    icon:'fa-industry',
+    title:'營收高度集中於半導體單一產業',
+    now:'鈺祥<b>90%以上營收來自半導體</b>，客戶集中於台灣半導體龍頭與美系記憶體大廠，產業景氣循環風險相對集中。',
+    action:'依公司規劃加速跨產業滲透，包含AI資料中心、加密機房、電動車空調系統、PCB與光電等應用，分散營收結構。',
+    prio:'mid'
+  },
+  {
+    icon:'fa-bullhorn',
+    title:'國際品牌敘事與資本市場能見度仍在累積',
+    now:'鈺祥於<b>2026年3月才登錄興櫃</b>，國際投資人與海外客戶對其品牌認知仍在建立階段，相較康法數十年累積的全球ESG品牌敘事仍有差距。',
+    action:'善用CaaS訂閱制、AI預警模型、碳中和濾網等具故事性題材，強化國際公關、IR溝通與獎項申請素材，對標康法的品牌敘事打法。',
+    prio:'mid'
+  },
+  {
+    icon:'fa-database',
+    title:'研發數據治理平台化尚未成熟',
+    now:'公司自身興櫃公開說明書中提及，<b>研發平台化與跨部門數據整合仍在建置階段</b>，材料—性能資料庫尚未完全系統化。',
+    action:'加速材料—性能資料庫與跨部門知識管理系統上線，將一般型與再生型產品開發流程模組化，提升新品迭代效率。',
+    prio:'low'
+  },
+];
+document.getElementById('gapList').innerHTML = gaps.map((g,i)=>`
+  <div class="gap-card">
+    <div class="gap-num"><i class="fa-solid ${g.icon}"></i></div>
+    <div class="gap-body">
+      <h3>${g.title}</h3>
+      <div class="now">${g.now}</div>
+      <div class="action"><b>加強建議 →</b> ${g.action}</div>
+    </div>
+    <div class="prio ${g.prio}">${g.prio==='high'?'優先度：高':g.prio==='mid'?'優先度：中':'優先度：低'}</div>
+  </div>
+`).join('');
+
+
+/* ---------------- Global landscape ---------------- */
+const companies = [
+  {name:'Entegris', hq:'美國 · 麻州', tag:'那斯達克 ENTG', desc:'全球AMC過濾龍頭之一，市占逾20%，產品橫跨污染防治、材料處理與純化，客戶涵蓋全球主要邏輯與記憶體大廠。', rel:'規模與資本實力遠大於鈺祥，是<b>北美市場最大競爭門檻</b>。'},
+  {name:'Exyte Technology', hq:'德國', tag:'工程服務巨頭', desc:'全球領先的半導體廠務工程（EPC/EPCM）供應商，同時跨足AMC過濾解決方案，服務全球前20大半導體製造商。', rel:'透過廠務工程綁定客戶，<b>在新廠建置階段即可切入</b>，與鈺祥形成通路型競爭。'},
+  {name:'康法 Camfil', hq:'瑞典', tag:'全品類過濾', desc:'全球性空氣過濾大廠，產品線涵蓋粒子濾網、HEPA/ULPA至AMC控制，ESG與循環經濟品牌敘事鮮明。', rel:'本報告核心比較對象，詳見「總覽」與監測報告內容。'},
+  {name:'AAF International', hq:'美國', tag:'老牌工業過濾', desc:'成立近百年的工業與商用空氣過濾大廠，產品線廣泛，近年跨入半導體潔淨室應用。', rel:'品牌歷史悠久，但半導體先進製程專精度不如鈺祥。'},
+  {name:'Purafil', hq:'美國 · 喬治亞州', tag:'氣相過濾專家', desc:'專精氣相化學過濾（活性碳/氧化鋁）技術，深耕工業與電子廠環控應用數十年。', rel:'技術路線與鈺祥高度重疊，屬<b>直接技術型競爭者</b>。'},
+  {name:'Dan-Takuma Technologies', hq:'日本', tag:'日系精密製造', desc:'日系微污染防治設備與濾材供應商，深耕日本半導体與面板供應鏈。', rel:'鈺祥跟隨客戶赴熊本設點後，將與其在<b>日本在地市場正面交手</b>。'},
+  {name:'SV Techsol', hq:'亞太', tag:'成本效率型', desc:'以高性價比聚合物濾材切入市場，在亞太區成長迅速。', rel:'代表<b>低價競爭壓力</b>，主要衝擊中低階製程訂單。'},
+  {name:'Cobetter', hq:'中國', tag:'薄膜濾材快速成長', desc:'中國濾材廠商，以成本效率型聚合物薄膜濾材搭配本地設備商快速綁定客戶。', rel:'受惠中國本土半導體供應鏈自主化政策，<b>中長期潛在威脅</b>。'},
+  {name:'Ecopro', hq:'南韓', tag:'韓系環控廠商', desc:'南韓微污染防治與環境材料供應商，服務當地半導體與電池供應鏈。', rel:'鎖定南韓半導體客戶，與鈺祥於<b>南韓市場布局</b>形成潛在競爭。'},
+];
+document.getElementById('landGrid').innerHTML = companies.map(c=>`
+  <div class="co-card">
+    <div class="co-top">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div class="co-icon"><i class="fa-solid fa-building"></i></div>
+        <div>
+          <div class="co-name">${c.name}</div>
+          <div class="co-hq">${c.hq}</div>
+        </div>
+      </div>
+      <div class="co-tag">${c.tag}</div>
+    </div>
+    <div class="co-desc">${c.desc}</div>
+    <div class="co-rel">${c.rel}</div>
+  </div>
+`).join('');
+</script>
+</body>
+</html>
